@@ -32,7 +32,7 @@ Routes.prototype._validate = function(routeConfig) {
             var routes = routesRoot[routePath];
             for (var httpVerb in routes) {
                 if (!legalHttpVerbs.indexOf(httpVerb) != -1) {
-                    throw "Illegal HTTP verb: " + httpVerb;
+                    throw new Error("Illegal HTTP verb: " + httpVerb);
                 }
             }
         }

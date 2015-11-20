@@ -18,23 +18,25 @@ You must currently set the data source and environment you plan to use inside `a
 ### Configuration format
 
 - **server:**
-    - **httpPort:** HTTP port to listen on.
-    - **httpsPort:** HTTPS port to listen on.
+    - (string) **httpPort:** HTTP port to listen on.
+    - (string) **httpsPort:** HTTPS port to listen on.
     - **ssl:** SSL configuration.
-        - **keyPath:** Path to a file containing the private key for the public server certificate.
-        - **certificatePath:** Path to a file to use as the public server certificate.
-    - **dataSources:** Your data sources.
+        - (string) **keyPath:** Path to a file containing the private key for the public server certificate.
+        - (string) **certificatePath:** Path to a file to use as the public server certificate.
+    - **database:**
+        - (bool) **createIfNeeded:** Create the database and/or missing tables if needed.
+    - **dataSources:**
         - (a name of your choice)
-            - **database:** Database name.
-            - **username:** Database username.
-            - **password:** Database password.
-            - **options:** Additional options (see [documentation for Sequelize](http://docs.sequelizejs.com/en/latest/api/sequelize/#new-sequelizedatabase-usernamenull-passwordnull-options)).
+            - (string) **type:** Possible values: `sqlite`.
+            - (string) **database:** Database name.
+            - (string) **username:** Database username.
+            - (string) **password:** Database password.
         - ...
     - **businessRules:** Business/Application rules.
         -  **drawing:** Drawings produced by SuperPaint and uploaded.
             -  **upload:** Rules for uploaded drawings.
                 -  **limits:** Limitations.
-                    -  **minDimensions:** Minimum image dimensions.
-                    -  **maxDimensions:** Maximum image dimensions.
-                    -  **minFileSize:** Minimum file size.
-                    -  **maxFileSize:** Maximum file size.
+                    -  (int) **minDimensions:** Minimum image dimensions.
+                    -  (int) **maxDimensions:** Maximum image dimensions.
+                    -  (int) **minFileSize:** Minimum file size.
+                    -  (int) **maxFileSize:** Maximum file size.

@@ -3,9 +3,12 @@
         "httpPort": 80,
         "httpsPort": 443,
         "ssl": {
-            "keyPath": "",
-            "certificatePath": ""
+            "keyPath": null,
+            "certificatePath": null
         }
+    },
+    "database": {
+        "sync": false
     },
     "dataSources": {
     },
@@ -15,8 +18,8 @@
                 "limits": {
                     "minDimensions": { "x" : 128, "y": 128},
                     "maxDimensions": { "x" : 512, "y": 512},
-                    "minFileSize": 1048576,
-                    "maxFileSize": 128
+                    "minFileSize": 128,
+                    "maxFileSize": 1048576
                 }
             }
         }

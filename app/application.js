@@ -3,6 +3,40 @@ var restify = require("restify");
 var Promise = require("bluebird");
 var routes = require("./routes");
 
+
+/**
+ * Avoids crashing and shutting down the server by returning a status code to the client, and a message if it's an HTTP error.
+ */
+function restifyExceptionHandler(req, res, route, err) {
+    // Return HTTP errors to the client
+    if (err instanceof restify.HttpError) {
+        return res.send(err);
+    }
+
+    // TODO: Log internal errors
+
+    if (typeof err === "string" || err instanceof String) {
+        console.error("Unhandled exception: " + err);
+    }
+    else {
+        var stack = err.hasOwnProperty("stack") ? err.stack : "(stack trace not available)";
+        console.error("Unhandled exception", stack);
+    }
+
+    res.send(500);
+}
+
+function logRequest(request, result, next) {
+    console.log("Request:", JSON.stringify({
+        url: request.url,
+        method: request.method,
+        headers: request.headers
+    }));
+
+    next();
+}
+
+
 /**
  * @param config         The configuration to use.
  * @param dataSourceName The data source to use from the configuration.
@@ -17,8 +51,13 @@ function Application(config, dataSourceName, environment) {
 /**
  * Does plumbing and starts the server.
  * @throws If the specified data source was not found in the configuration.
+ * @return {Promise}
  */
 Application.prototype.run = function() {
+    Promise.onPossiblyUnhandledRejection(function(e, promise) {
+        throw e;
+    });
+
     var dbContext = require("./data/dbContext.js");
     var config = this._config;
 
@@ -26,31 +65,36 @@ Application.prototype.run = function() {
         throw new Error("Invalid data source name: " + this._dataSourceName);
     }
 
-    dbContext.configure(config.dataSources[this._dataSourceName]);
-
-    this._createServer(
-        config.server.httpsPort,
-        {
-            key: fs.readFileSync(config.server.ssl.keyPath),
-            certificate: fs.readFileSync(config.server.ssl.certificatePath)
-        }
-    ).then(function() {
-        return this._createServerRedirectingToHttps(config.server.httpPort);
-    }.bind(this)).then(function() {
-        console.log("Server is up.");
-    });
+    var this_ = this;
+    return dbContext.configure(config.dataSources[this_._dataSourceName], config.database.sync)
+        .then(function() {
+            return this_._createServer(config.server.httpsPort, {
+                key: fs.readFileSync(config.server.ssl.keyPath),
+                certificate: fs.readFileSync(config.server.ssl.certificatePath)
+            })
+        })
+        .then(function() {
+            return this_._createServerRedirectingToHttps(config.server.httpPort)
+        })
+        .then(function() {
+            console.log("Server is up.");
+        });
 };
 
 /**
  * Creates a server instance (using restify) and starts listening.
  * @param  listenPort    The port number to listen on.
  * @param  serverOptions Optional configuration for the server (see restify docs).
- * @return The new server instance.
+ * @return {Promise}
  */
 Application.prototype._createServer = function(listenPort, serverOptions) {
     return new Promise(function(resolve, reject) {
         var server = restify.createServer(serverOptions);
-        
+
+        server.on("uncaughtException", restifyExceptionHandler);
+
+        server.pre(logRequest);
+
         server.use(restify.acceptParser(server.acceptable));
         server.use(restify.bodyParser());
         server.use(restify.CORS());
@@ -59,7 +103,7 @@ Application.prototype._createServer = function(listenPort, serverOptions) {
 
         server.listen(listenPort, function() {
             console.log("Listening at %s", server.url);
-            resolve(server);
+            resolve();
         });
     });
 }
@@ -67,18 +111,22 @@ Application.prototype._createServer = function(listenPort, serverOptions) {
 /**
  * Creates a server (using restify) for unencrypted requests, and redirects all requests to use encrypted connections.
  * @param  port The port number to listen on.
+ * @return {Promise}
  */
 Application.prototype._createServerRedirectingToHttps = function(port) {
     return new Promise(function(resolve, reject) {
         var server = restify.createServer();
+
+        server.on("uncaughtException", restifyExceptionHandler);
+
+        server.pre(logRequest);
 
         server.pre(function(request, result, next) {
             // Redirect to HTTPS
             if (!request.isSecure()) {
                 // TODO: Check whether non-standard ports are included in the host header, and remove/replace them.
                 var secureUrl = "https://" + request.header("host") + request.url;
-                result.redirect(301, secureUrl, next);
-                return;
+                return result.redirect(301, secureUrl, next);
             }
 
             return next();
@@ -86,7 +134,7 @@ Application.prototype._createServerRedirectingToHttps = function(port) {
 
         server.listen(port, function() {
             console.log("Listening at %s", server.url);
-            resolve(server);
+            resolve();
         });
     });
 }
