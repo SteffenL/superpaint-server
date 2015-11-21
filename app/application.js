@@ -74,9 +74,6 @@ Application.prototype.run = function() {
             })
         })
         .then(function() {
-            return this_._createServerRedirectingToHttps(config.server.httpPort)
-        })
-        .then(function() {
             console.log("Server is up.");
         });
 };
@@ -102,37 +99,6 @@ Application.prototype._createServer = function(listenPort, serverOptions) {
         routes.setupRoutes(server);
 
         server.listen(listenPort, function() {
-            console.log("Listening at %s", server.url);
-            resolve();
-        });
-    });
-}
-
-/**
- * Creates a server (using restify) for unencrypted requests, and redirects all requests to use encrypted connections.
- * @param  port The port number to listen on.
- * @return {Promise}
- */
-Application.prototype._createServerRedirectingToHttps = function(port) {
-    return new Promise(function(resolve, reject) {
-        var server = restify.createServer();
-
-        server.on("uncaughtException", restifyExceptionHandler);
-
-        server.pre(logRequest);
-
-        server.pre(function(request, result, next) {
-            // Redirect to HTTPS
-            if (!request.isSecure()) {
-                // TODO: Check whether non-standard ports are included in the host header, and remove/replace them.
-                var secureUrl = "https://" + request.header("host") + request.url;
-                return result.redirect(301, secureUrl, next);
-            }
-
-            return next();
-        });
-
-        server.listen(port, function() {
             console.log("Listening at %s", server.url);
             resolve();
         });
