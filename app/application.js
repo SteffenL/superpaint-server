@@ -8,6 +8,7 @@ var routes = require("./routes");
  * Avoids crashing and shutting down the server by returning a status code to the client, and a message if it's an HTTP error.
  */
 function restifyExceptionHandler(req, res, route, err) {
+    console.log("exception");
     // Return HTTP errors to the client
     if (err instanceof restify.HttpError) {
         return res.send(err);

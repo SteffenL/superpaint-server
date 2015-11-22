@@ -4,9 +4,13 @@ var config = require("../../config").get();
 var Promise = require("bluebird");
 var fs = Promise.promisifyAll(require("fs"));
 var crypto = require("crypto");
-var lwip = require("lwip");
+var Jimp = require("jimp");
 var restify = require("restify");
 var util = require("util");
+
+function makeDrawingImageUrl(uuid) {
+    return "https://superpaint-api.steffenl.com/drawing/" + uuid;
+}
 
 module.exports = {
     "/drawing": {
@@ -22,6 +26,9 @@ module.exports = {
 
                     response.send(viewModels);
                     next();
+                })
+                .catch(function(err) {
+                    next(err);
                 });
         },
         post: function(request, response, next) {
@@ -70,33 +77,67 @@ module.exports = {
                 .then(function() {
                     return new Promise(function(resolve, reject) {
                         try {
-                            lwip.open(tempFilePath, function(err, image) {
-                                console.log(image);
+                            Jimp.read(tempFilePath, function(err, image) {
                                 if (err) throw restify.BadRequestError("Failed to open the image");
 
-                                console.log(util.format("%d,%d", image.width, image.height));
-
                                 // Validate image dimensions
-                                if (image.width < uploadLimits.minDimensions.x || image.width > uploadLimits.maxDimensions.x
+                                /*if (image.width < uploadLimits.minDimensions.x || image.width > uploadLimits.maxDimensions.x
                                     || image.height < uploadLimits.minDimensions.y || image.height > uploadLimits.maxDimensions.y) {
                                     throw new restify.BadRequestError(util.format(
                                         "The image must have dimensions between %dx%d and %dx%d (inclusive).",
                                         uploadLimits.minDimensions.x, uploadLimits.minDimensions.y, uploadLimits.maxDimensions.x, uploadLimits.maxDimensions.y));
-                                }
+                                }*/
+
+                                image.resize(uploadLimits.maxDimensions.x, uploadLimits.maxDimensions.y);
 
                                 resolve(image);
                             });
                         }
                         catch (ex) {
                             console.error("Failed to open the image: ", ex);
-                            throw new restify.BadRequestError("Failed to open the image");
+                            throw new restify.BadRequestError("Unable to process this image");
                         }
                     });
                 })
                 .then(function(image) {
-                    console.log("ok");
-                    response.send({});
+                    // Store image
+                    image.getBuffer(Jimp.MIME_PNG, function(err, buffer) {
+                        if (err) throw err;
+
+                        var hasher = crypto.createHash("sha256");
+                        hasher.update(buffer);
+                        var hash = hasher.digest("hex");
+
+                        dbContext.models.Drawing.create({
+                            contents: buffer,
+                            hash: hash
+                        })
+                        .then(function(model) {
+                            response.send({
+                                id: model.drawingUuid,
+                                url: makeDrawingImageUrl(model.drawingUuid)
+                            });
+                            next();
+                        });
+                    });
+                });
+        }
+    },
+    "/drawing/:uuid": {
+        get: function(request, response, next) {
+            dbContext.models.Drawing.findOne({ where: { drawingUuid: request.params.uuid }, attributes: { include: ["drawingUuid"] }})
+                .then(function(model) {
+                    if (!model) {
+                        throw new restify.NotFoundError();
+                    }
+
+                    response.send({
+                        url: makeDrawingImageUrl(model.drawingUuid)
+                    });
                     next();
+                })
+                .catch(function(err) {
+                    next(err);
                 });
         }
     }
