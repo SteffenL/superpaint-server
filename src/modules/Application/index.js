@@ -13,6 +13,9 @@ let path = require("path");
 let koaApp = koa();
 
 class Application {
+    /**
+     * TODO: doc
+     */
 	constructor(config, dataSourceName, environment) {
 		this._config = config;
 		this._dataSourcename = dataSourceName;
@@ -36,7 +39,7 @@ class Application {
 	/**
 	 * Creates a server instance (using Koa) and starts listening.
 	 * @param  listenPort    The port number to listen on.
-	 * @param  serverOptions Optional configuration for the server (see ? docs).
+	 * @param  serverOptions Optional configuration for the server (see Node.js docs for http/https modules).
 	 * @returns {Promise}
 	 */
 	_createServer(listenPort, serverOptions) {

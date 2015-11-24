@@ -4,6 +4,9 @@ let Util = require("../Util");
 let path = require("path");
 
 class ConfigProvider {
+    /**
+     * TODO: doc
+     */
     constructor(baseConfigDir, userConfigDir) {
         const defaultConfigName = "default";
         this._configFileExtension = ".json";
