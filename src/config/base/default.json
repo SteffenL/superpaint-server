@@ -1,0 +1,27 @@
+﻿{
+    "server": {
+        "httpPort": 80,
+        "httpsPort": 443,
+        "ssl": {
+            "keyPath": null,
+            "certificatePath": null
+        }
+    },
+    "database": {
+        "sync": false
+    },
+    "dataSources": {
+    },
+    "businessRules": {
+        "drawing": {
+            "upload": {
+                "limits": {
+                    "minDimensions": { "x" : 128, "y": 128},
+                    "maxDimensions": { "x" : 512, "y": 512},
+                    "minFileSize": 128,
+                    "maxFileSize": 1048576
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "superpaint-server",
+  "version": "0.0.0",
+  "private": true,
+  "description": "superpaint-server",
+  "main": "main.js",
+  "author": {
+    "name": "Steffen",
+    "email": "steffenl.sw@gmail.com"
+  },
+  "dependencies": {
+    "crypto": "^0.0.3",
+    "glob": "^6.0.1",
+    "jimp": "^0.2.19",
+    "koa": "^1.1.2",
+    "sequelize": "^3.14.0",
+    "sqlite3": "^3.1.1"
+  }
+}
