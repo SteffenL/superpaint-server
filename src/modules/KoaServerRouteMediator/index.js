@@ -1,5 +1,7 @@
 "use strict";
 
+let koaRoute = require("koa-route");
+
 class KoaServerRouteMediator {
     /**
      * TODO: doc
@@ -11,8 +13,9 @@ class KoaServerRouteMediator {
     /**
      * TODO: doc
      */
-    assignRoute(httpVerb, routePath, routeConfig) {
-        this._server.use(koaRoute[httpVerb](routePath, routes[httpVerb]));
+    assignRoute(httpVerb, routePath, handler) {
+        let method = koaRoute[httpVerb];
+        this._server.use(method(routePath, handler));
     };
 }
 

@@ -24,7 +24,8 @@ class Routes {
             for (let routePath in routesRoot) {
                 let routes = routesRoot[routePath];
                 for (let httpVerb in routes) {
-                    server.assignRoute(httpVerb, routePath, routes[httpVerb]);
+                    let handler = routes[httpVerb];
+                    mediator.assignRoute(httpVerb, routePath, handler);
                 }
             }
         }

@@ -9,12 +9,15 @@
     "email": "steffenl.sw@gmail.com"
   },
   "dependencies": {
+    "adonis-fold": "^1.0.6",
+    "adonis-lucid": "^1.0.5",
     "crypto": "^0.0.3",
     "glob": "^6.0.1",
     "jimp": "^0.2.19",
     "jugglingdb": "^1.0.2",
     "jugglingdb-sqlite3": "0.0.5",
     "koa": "^1.1.2",
+    "koa-route": "^2.4.2",
     "sequelize": "^3.14.0",
     "sqlite3": "^3.1.1"
   }
