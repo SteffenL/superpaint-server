@@ -2,35 +2,39 @@
 
 let glob = require("glob");
 let path = require("path");
-let koaRoute = require("koa-route");
 
 class Routes {
-    constructor() {
+    /**
+     * @param {String} routesDir Path to the root directory containing route descriptor files.
+     */
+    constructor(routesDir) {
+        // Get the aboslute routes dir to please glob later
+        this._routesDir = path.normalize(routesDir);
+
         this._routeConfig = [];
         this._configure();
     }
 
     /**
-    * Dynamically retrieves route information from files on the file system.
-    * @param  server   Server instance returned by Koa.
-    * @param  rootPath Path to the root directory containing route descriptor files.
-    */
-    setupRoutes(server) {
+     * Dynamically retrieves route information from files on the file system.
+     * @param mediator Server/Route mediator.
+     */
+    assignToServer(mediator) {
         for (let routesRoot of this._routeConfig) {
             for (let routePath in routesRoot) {
                 let routes = routesRoot[routePath];
                 for (let httpVerb in routes) {
-                    server.use(koaRoute[httpVerb](routePath, routes[httpVerb]));
+                    server.assignRoute(httpVerb, routePath, routes[httpVerb]);
                 }
             }
         }
     };
 
     /**
-    * Validates the current route configuration.
-    * @param  routeConfig The route configuration to validate.
-    * @throws Will throw if an illegal HTTP verb is present in the route configuration.
-    */
+     * Validates the current route configuration.
+     * @param  routeConfig The route configuration to validate.
+     * @throws When an illegal HTTP verb is present in the route configuration.
+     */
     _validate(routeConfig) {
         let legalHttpVerbs = ["get", "post", "put", "head", "delete"];
 
@@ -47,14 +51,14 @@ class Routes {
     };
 
     /**
-    * Dynamically retrieves route information from files on the file system.
-    */
+     * Dynamically retrieves route information from files on the file system.
+     */
     _configure() {
-        const routesDir = path.join(__dirname, "routes");
         this._routeConfig = [];
 
         // "./" will be removed if present, so let's make an absolute path
-        let pattern = routesDir + "/**/*.js";
+        // Note: To make glob happy, make sure the path is absolute or that it's a relative path starting with dot-slash (./).
+        let pattern = this._routesDir + "/**/*.js";
         // glob needs forward-slashes
         pattern = pattern.replace(/\\/g, "/");
         const matches = glob.sync(pattern);
@@ -67,4 +71,4 @@ class Routes {
     };
 }
 
-module.exports = new Routes();
+module.exports = Routes;

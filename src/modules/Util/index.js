@@ -1,8 +1,6 @@
 "use strict";
 
 class Util {
-    constructor() { }
-
     /**
      * Merges the properties of the source object directly into the base object.
      * @param {Object} base

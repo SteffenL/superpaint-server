@@ -1,17 +1,25 @@
 ﻿"use strict";
 
-let Util = require("../util");
+let Util = require("../Util");
 let path = require("path");
 
 class ConfigProvider {
-    constructor() {
+    constructor(baseConfigDir, userConfigDir) {
+        const defaultConfigName = "default";
+        this._configFileExtension = ".json";
+
         this._config = null;
-        this._baseConfigDir = path.join(__dirname, "base");
-        this._userConfigDir = path.join(__dirname, "../../config");
+        this._baseConfigDir = baseConfigDir;
+        this._userConfigDir = userConfigDir;
         // Load the default base config and the default user config
-        this._defaultConfig = this._loadConfig("default");
+        this._defaultConfig = this._loadConfig(defaultConfigName);
     }
 
+    /**
+     * Get a named configuration, loading it if needed.
+     * @param {String} name Name of the configuration.
+     * @returns {Object} The configuration.
+     */
     get(name) {
         if (!this._config) {
             let environmentConfig = this._loadConfig(name);
@@ -29,7 +37,7 @@ class ConfigProvider {
     _loadConfig(name) {
         let lastConfigPath = null;
         try {
-            const fileName = name + ".json";
+            const fileName = name + this._configFileExtension;
             const baseConfigPath = path.join(this._baseConfigDir, fileName);
             const userConfigPath = path.join(this._userConfigDir, fileName);
 
@@ -52,10 +60,9 @@ class ConfigProvider {
      * @returns {Object}
      */
     _mergeConfig(base, source) {
-        // A quick and dirty way to copy properties
-        let baseCopy = JSON.parse(JSON.stringify(base));
+        let baseCopy = Object.assign({}, base);
         return Util.mergeObjectProperties(baseCopy, source);
     }
 }
 
-module.exports = new ConfigProvider();
+module.exports = ConfigProvider;
