@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-let Util = require("../Util");
+let utils = require("../utils");
 let path = require("path");
 
 class ConfigProvider {
@@ -48,6 +48,7 @@ class ConfigProvider {
                 require(lastConfigPath = baseConfigPath),
                 require(lastConfigPath = userConfigPath)
             );
+
             return mergedConfig;
         }
         catch (ex) {
@@ -64,7 +65,7 @@ class ConfigProvider {
      */
     _mergeConfig(base, source) {
         let baseCopy = Object.assign({}, base);
-        return Util.mergeObjectProperties(baseCopy, source);
+        return utils.Object.mergeProperties(baseCopy, source);
     }
 }
 

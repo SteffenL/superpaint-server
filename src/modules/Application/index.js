@@ -1,8 +1,9 @@
 "use strict";
 
-let Routes = require("../Routes");
-let StandardPaths = require("../StandardPaths");
-let KoaServerRouteMediator = require("../KoaServerRouteMediator");
+let Routes = require("../routes/Routes");
+let KoaServerRouteMediator = require("../routes/route_mediators/KoaServerRouteMediator");
+let BookshelfFactory = require("../data/BookshelfFactory");
+let appContext = require("../../appContext");
 
 let fs = require("fs");
 let http = require("http");
@@ -16,18 +17,16 @@ class Application {
     /**
      * TODO: doc
      */
-    constructor(config, dataSourceName, environment) {
-        this._config = config;
-        this._dataSourcename = dataSourceName;
-        this._environment = environment;
-        this._routes = new Routes(path.join(StandardPaths.appDir, "routes"));
+    constructor() {
+        this._routes = new Routes(appContext.routesDir);
+        BookshelfFactory.configure(appContext.dataSource);
     }
 
     /**
      * Runs this application.
      */
     run() {
-        const serverConfig = this._config.server;
+        const serverConfig = appContext.config.server;
         this._createServer(serverConfig.httpsPort, {
             key: fs.readFileSync(serverConfig.ssl.keyPath),
             cert: fs.readFileSync(serverConfig.ssl.certificatePath)
