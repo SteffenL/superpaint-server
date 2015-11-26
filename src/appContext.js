@@ -3,12 +3,17 @@
 let path = require("path");
 
 let ConfigProvider = require("./modules/ConfigProvider");
-var bootConfig = require("../bootConfig.json");
+var currentBootConfig = require("../bootConfig.json");
+let BookshelfFactory = require("./modules/data/BookshelfFactory");
 
 /**
  * A class encapsulating data that is shared across the application.
  */
 class AppContext {
+    constructor(bootConfig) {
+        this._bootConfig = bootConfig;
+    }
+
     /**
      * @param {String} appDir
      */
@@ -19,8 +24,9 @@ class AppContext {
         this._logsDir = path.join(this._appDir, "../logs");
         this._routesDir = path.join(this._appDir, "routes");
 
-        this._config = this._loadConfig(bootConfig.environment);
-        this._dataSource = this._normalizeDataSource(this._config.dataSources[bootConfig.dataSource]);
+        this._config = this._loadConfig(this._bootConfig.environment);
+        this._dataSource = this._normalizeDataSource(this._config.dataSources[this._bootConfig.dataSource]);
+        this._bookshelf = BookshelfFactory.create(this._dataSource);
     }
 
     get appDir() {
@@ -47,6 +53,10 @@ class AppContext {
         return this._dataSource;
     }
 
+    get bookshelf() {
+        return this._bookshelf;
+    }
+
     _loadConfig(name) {
         let configProvider = new ConfigProvider(
             path.join(this._appDir, "base_config"),
@@ -56,9 +66,18 @@ class AppContext {
     }
 
     _normalizeDataSource(ds) {
-        ds.filename = path.join(this._dataStoreDir, ds.filename);
+        if (!ds) {
+            return {};
+        }
+
+        if (ds.filename) {
+            ds.filename = path.join(this._dataStoreDir, ds.filename);
+        }
+
         return ds;
     }
 }
 
-module.exports = new AppContext();
+AppContext.instance = new AppContext(currentBootConfig);
+
+module.exports = AppContext;

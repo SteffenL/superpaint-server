@@ -10,17 +10,10 @@ class BookshelfFactory {
         this._bookshelf = null;
     }
 
-    static configure(dataSource) {
+    static create(dataSource) {
         this._dataSource = dataSource;
         this._knex = KnexFactory.create(this._dataSource);
         this._bookshelf = bookshelfFactory(this._knex);
-    }
-
-    get knex() {
-        return this._knex;
-    }
-
-    get bookshelf() {
         return this._bookshelf;
     }
 }

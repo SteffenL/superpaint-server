@@ -44,10 +44,10 @@ class ConfigProvider {
             const baseConfigPath = path.join(this._baseConfigDir, fileName);
             const userConfigPath = path.join(this._userConfigDir, fileName);
 
-            let mergedConfig = this._mergeConfig(
-                require(lastConfigPath = baseConfigPath),
-                require(lastConfigPath = userConfigPath)
-            );
+            const baseConfig = require(lastConfigPath = baseConfigPath);
+            const userConfig = require(lastConfigPath = userConfigPath);
+
+            let mergedConfig = this._mergeConfig(baseConfig, userConfig);
 
             return mergedConfig;
         }
@@ -64,7 +64,7 @@ class ConfigProvider {
      * @returns {Object}
      */
     _mergeConfig(base, source) {
-        let baseCopy = Object.assign({}, base);
+        let baseCopy = utils.Object.copyProperties(base);
         return utils.Object.mergeProperties(baseCopy, source);
     }
 }

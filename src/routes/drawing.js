@@ -1,35 +1,48 @@
 ﻿"use strict";
 
+let appContext = require("../appContext").instance;
+let dataModels = require("../data/models");
+
 class DrawingRouteHandlers {
-    static *list(context) {
-        let model = {
-            id: ""
-        };
-        
-        this.body = model;
+    static *list() {
+        let viewModels = [];
+
+        let collection = yield dataModels.Drawing
+            .query("orderBy", "created_at", "asc")
+            .fetchAll();
+
+        console.log(collection);
+        /*for (let model of collection) {
+            console.log(model);
+        }*/
+
+        /*let viewModel = {
+            id: 
+        };*/
+
+        this.body = viewModels;
     }
-    
-    static *upload(context) {
-        
+
+    static *create() {
+
     }
-    
-    static *view(context, uuid) {
-        let model = {
-            id: ""
+
+    static *read(uuid) {
+        let viewModel = {
         };
-        
-        this.body = model;
+
+        this.body = viewModel;
     }
 }
 
-let handlers =  DrawingRouteHandlers;
+let Handlers = DrawingRouteHandlers;
 
 module.exports = {
     "/drawing": {
-        get: handlers.list,
-        post: handlers.upload,
+        get: Handlers.list,
+        post: Handlers.create,
     },
     "/drawing/:uuid": {
-        get: handlers.view
+        get: Handlers.read
     }
 };

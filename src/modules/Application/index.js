@@ -2,8 +2,7 @@
 
 let Routes = require("../routes/Routes");
 let KoaServerRouteMediator = require("../routes/route_mediators/KoaServerRouteMediator");
-let BookshelfFactory = require("../data/BookshelfFactory");
-let appContext = require("../../appContext");
+let appContext = require("../../appContext").instance;
 
 let fs = require("fs");
 let http = require("http");
@@ -19,7 +18,6 @@ class Application {
      */
     constructor() {
         this._routes = new Routes(appContext.routesDir);
-        BookshelfFactory.configure(appContext.dataSource);
     }
 
     /**

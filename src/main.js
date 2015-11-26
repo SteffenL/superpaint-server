@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-require("./appContext").configure(__dirname);
+require("./appContext").instance.configure(__dirname);
 
 let Application = require("./modules/Application");
 
