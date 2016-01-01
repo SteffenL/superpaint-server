@@ -1,7 +1,7 @@
 "use strict";
 
-let glob = require("glob");
-let path = require("path");
+const glob = require("glob"),
+    path = require("path");
 
 class Routes {
     /**
@@ -43,7 +43,7 @@ class Routes {
             for (let routePath in routesRoot) {
                 let routes = routesRoot[routePath];
                 for (let httpVerb in routes) {
-                    if (legalHttpVerbs.indexOf(httpVerb) == -1) {
+                    if (legalHttpVerbs.indexOf(httpVerb) === -1) {
                         throw new Error("Illegal HTTP verb: " + httpVerb);
                     }
                 }

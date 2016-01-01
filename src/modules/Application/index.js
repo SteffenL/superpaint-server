@@ -1,16 +1,16 @@
 "use strict";
 
-let Routes = require("../routes/Routes");
-let KoaServerRouteMediator = require("../routes/route_mediators/KoaServerRouteMediator");
-let appContext = require("../../appContext").instance;
+const Routes = require("../routes/Routes"),
+    KoaServerRouteMediator = require("../routes/route_mediators/KoaServerRouteMediator"),
+    appContext = require("../../appContext").instance,
+    formidable = require("koa-formidable"),
+    path = require("path"),
+    fs = require("fs"),
+    http = require("http"),
+    https = require("https"),
+    koa = require("koa");
 
-let fs = require("fs");
-let http = require("http");
-let https = require("https");
-let koa = require("koa");
-let path = require("path");
-
-let koaApp = koa();
+const koaApp = koa();
 
 class Application {
     /**
@@ -41,6 +41,7 @@ class Application {
      */
     _createServer(listenPort, serverOptions) {
         let server = https.createServer(serverOptions, koaApp.callback());
+        //koaApp.use(formidable());
         this._routes.assignToServer(new KoaServerRouteMediator(koaApp));
         return new Promise((resolve, reject) => {
             server.listen(listenPort, () => {

@@ -1,7 +1,7 @@
 "use strict";
 
-let knexFactory = require("knex");
-let KnexConfigAdapter = require("./config_adapters/KnexConfigAdapter");
+const knexFactory = require("knex"),
+    KnexConfigAdapter = require("./config_adapters/KnexConfigAdapter");
 
 class KnexFactory {
     static create(config) {

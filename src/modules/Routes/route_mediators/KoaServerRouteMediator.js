@@ -1,6 +1,6 @@
 "use strict";
 
-let koaRoute = require("koa-route");
+const koaRoute = require("koa-route");
 
 class KoaServerRouteMediator {
     /**
@@ -13,9 +13,22 @@ class KoaServerRouteMediator {
     /**
      * TODO: doc
      */
-    assignRoute(httpVerb, routePath, handler) {
-        let method = koaRoute[httpVerb];
-        this._server.use(method(routePath, handler));
+    assignRoute(httpVerb, routePath, obj) {
+        const method = koaRoute[httpVerb];
+
+        // This can be used to pass data from validators to handlers
+        this._server.use(function*(next) {
+            this.params = {};
+            yield next;
+        });
+
+        if (obj.validate) {
+            this._server.use(method(routePath, obj.validate));
+        }
+
+        if (obj.handle) {
+            this._server.use(method(routePath, obj.handle));
+        }
     };
 }
 

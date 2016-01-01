@@ -1,10 +1,10 @@
 "use strict";
 
-let path = require("path");
-let AppContext = require("../../AppContext");
-let KnexConfigAdapter = require("../../modules/data/config_adapters/KnexConfigAdapter");
+const path = require("path"),
+    AppContext = require("../AppContext"),
+    KnexConfigAdapter = require("../modules/data/config_adapters/KnexConfigAdapter");
 
-const appDir = path.join(__dirname, "../..");
+const appDir = path.join(__dirname, "..");
 
 function loadKnexConfig(dataSource, environment) {
     let appContext = new AppContext({

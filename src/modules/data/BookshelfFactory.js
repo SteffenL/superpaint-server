@@ -1,7 +1,7 @@
 "use strict";
 
-let bookshelfFactory = require("bookshelf");
-let KnexFactory = require("./KnexFactory");
+const bookshelfFactory = require("bookshelf"),
+    KnexFactory = require("./KnexFactory");
 
 class BookshelfFactory {
     constructor() {

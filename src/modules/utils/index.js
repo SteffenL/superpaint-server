@@ -1,7 +1,9 @@
 "use strict";
 
-var ObjectUtil = require("./ObjectUtil");
+const ObjectUtil = require("./ObjectUtil"),
+    GeometryUtil = require("./GeometryUtil");
 
 module.exports = {
-    Object: ObjectUtil
+    Object: ObjectUtil,
+    Geometry: GeometryUtil
 };

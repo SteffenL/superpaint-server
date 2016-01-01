@@ -1,10 +1,10 @@
 "use strict";
 
-let path = require("path");
+const path = require("path"),
+    ConfigProvider = require("./modules/ConfigProvider"),
+    BookshelfFactory = require("./modules/data/BookshelfFactory");
 
-let ConfigProvider = require("./modules/ConfigProvider");
-var currentBootConfig = require("../bootConfig.json");
-let BookshelfFactory = require("./modules/data/BookshelfFactory");
+const currentBootConfig = require("../bootConfig.json");
 
 /**
  * A class encapsulating data that is shared across the application.
@@ -23,6 +23,7 @@ class AppContext {
         this._dataStoreDir = path.join(this._appDir, "../data_store");
         this._logsDir = path.join(this._appDir, "../logs");
         this._routesDir = path.join(this._appDir, "routes");
+        this._uploadsDir = path.join(this._appDir, "../uploads");
 
         this._config = this._loadConfig(this._bootConfig.environment);
         this._dataSource = this._normalizeDataSource(this._config.dataSources[this._bootConfig.dataSource]);
@@ -43,6 +44,10 @@ class AppContext {
 
     get routesDir() {
         return this._routesDir;
+    }
+
+    get uploadsDir() {
+        return this._uploadsDir;
     }
 
     get config() {

@@ -1,7 +1,7 @@
 ﻿"use strict";
 
-let utils = require("../utils");
-let path = require("path");
+const utils = require("../utils"),
+    path = require("path");
 
 class ConfigProvider {
     /**

@@ -13,9 +13,10 @@ class ObjectUtil {
     static mergeProperties(base, source) {
         for (let k in source) {
             if (source.hasOwnProperty(k)) {
-                base[k] = base.hasOwnProperty(k) && source[k].constructor === Object
-                    ? this.mergeProperties(base[k], source[k])
-                    : source[k];
+                const value = source[k];
+                base[k] = base.hasOwnProperty(k) && value.constructor === Object
+                    ? this.mergeProperties(base[k], value)
+                    : value;
             }
         }
 
@@ -31,9 +32,10 @@ class ObjectUtil {
         let result = {};
         for (let k in source) {
             if (source.hasOwnProperty(k)) {
-                result[k] = source[k] && source[k].constructor === Object
-                    ? this.copyProperties(source[k])
-                    : Object.assign({}, source[k]);
+                const value = source[k];
+                result[k] = value && value.constructor === Object
+                    ? this.copyProperties(value)
+                    : value;
             }
         }
 
