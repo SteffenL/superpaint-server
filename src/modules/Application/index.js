@@ -25,9 +25,14 @@ class Application {
      */
     run() {
         const serverConfig = appContext.config.server;
-        this._createServer(serverConfig.httpsPort, {
-            key: fs.readFileSync(serverConfig.ssl.keyPath),
-            cert: fs.readFileSync(serverConfig.ssl.certificatePath)
+        let port = appContext.portOverride;
+        if (!port) {
+            port = serverConfig.useHttps ? serverConfig.httpsPort : serverConfig.httpPort;
+        }
+
+        this._createServer(port, {
+            key: serverConfig.useHttps ? fs.readFileSync(serverConfig.ssl.keyPath) : null,
+            cert: serverConfig.useHttps ? fs.readFileSync(serverConfig.ssl.certificatePath) : null
         }).then(() => {
             console.log("Server is up.");
         });

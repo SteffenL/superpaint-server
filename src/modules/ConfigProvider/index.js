@@ -1,7 +1,8 @@
 ﻿"use strict";
 
 const utils = require("../utils"),
-    path = require("path");
+    path = require("path"),
+    fs = require("fs");
 
 class ConfigProvider {
     /**
@@ -45,7 +46,8 @@ class ConfigProvider {
             const userConfigPath = path.join(this._userConfigDir, fileName);
 
             const baseConfig = require(lastConfigPath = baseConfigPath);
-            const userConfig = require(lastConfigPath = userConfigPath);
+            // User-defined configuration may override the base configuration, so the files are not strictly required
+            const userConfig = fs.exists(userConfigPath) ? require(lastConfigPath = userConfigPath) : {};
 
             let mergedConfig = this._mergeConfig(baseConfig, userConfig);
 

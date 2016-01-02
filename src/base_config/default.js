@@ -2,6 +2,7 @@
     server: {
         httpPort: 80,
         httpsPort: 443,
+        useHttps: false,
         ssl: {
             keyPath: null,
             certificatePath: null

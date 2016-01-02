@@ -61,6 +61,10 @@ class AppContext {
     get bookshelf() {
         return this._bookshelf;
     }
+    
+    get portOverride() {
+        return this._bootConfig.portOverride;
+    }
 
     _loadConfig(name) {
         let configProvider = new ConfigProvider(

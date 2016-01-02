@@ -4,13 +4,18 @@ const util = require("util");
 
 // Maps environment variable names to names we use internally
 const varNameMappings = {
-    "SUPERPAINT_DATASOURCE": {
-        "name": "dataSource",
-        "defaultValue": "main"
+    // This variable is provided by Heroku.
+    PORT: {
+        name: "portOverride",
+        defaultValue: null
     },
-    "SUPERPAINT_ENVIRONMENT": {
-        "name": "environment",
-        "defaultValue": "development"
+    SUPERPAINT_DATASOURCE: {
+        name: "dataSource",
+        defaultValue: "main"
+    },
+    SUPERPAINT_ENVIRONMENT: {
+        name: "environment",
+        defaultValue: "development"
     }
 };
 
