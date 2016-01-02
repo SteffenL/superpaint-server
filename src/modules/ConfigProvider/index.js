@@ -9,7 +9,7 @@ class ConfigProvider {
      */
     constructor(baseConfigDir, userConfigDir) {
         const defaultConfigName = "default";
-        this._configFileExtension = ".json";
+        this._configFileExtension = ".js";
 
         this._config = null;
         this._baseConfigDir = baseConfigDir;
