@@ -11,6 +11,15 @@
         "sync": false
     },
     "dataSources": {
+        "main": {
+            "type": "sqlite3",
+            "host": null,
+            "database": "superpaint",
+            "username": null,
+            "password": null,
+            "filename": "superpaint.db",
+            "charset": "utf8"
+        }
     },
     "businessRules": {
         "drawing": {
