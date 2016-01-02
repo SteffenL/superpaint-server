@@ -4,7 +4,7 @@ const path = require("path"),
     ConfigProvider = require("./modules/ConfigProvider"),
     BookshelfFactory = require("./modules/data/BookshelfFactory");
 
-const currentBootConfig = require("../bootConfig.json");
+const currentBootConfig = require("bootConfig");
 
 /**
  * A class encapsulating data that is shared across the application.
