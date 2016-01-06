@@ -25,15 +25,24 @@ class Application {
      */
     run() {
         const serverConfig = appContext.config.server;
+
         let port = appContext.portOverride;
         if (!port) {
             port = serverConfig.useHttps ? serverConfig.httpsPort : serverConfig.httpPort;
         }
 
-        this._createServer(port, {
-            key: serverConfig.useHttps ? fs.readFileSync(serverConfig.ssl.keyPath) : null,
-            cert: serverConfig.useHttps ? fs.readFileSync(serverConfig.ssl.certificatePath) : null
-        }).then(() => {
+        const serverFactory = serverConfig.useHttps
+            ? function() {
+                const serverOptions = {
+                    key: serverConfig.useHttps ? fs.readFileSync(serverConfig.ssl.keyPath) : null,
+                    cert: serverConfig.useHttps ? fs.readFileSync(serverConfig.ssl.certificatePath) : null
+                };
+                return https.createServer(serverOptions, koaApp.callback());
+            }
+            : function() {
+                return http.createServer(koaApp.callback());
+            };
+        this._createServer(port, serverFactory).then(() => {
             console.log("Server is up.");
         });
     }
@@ -44,8 +53,8 @@ class Application {
      * @param  serverOptions Optional configuration for the server (see Node.js docs for http/https modules).
      * @returns {Promise}
      */
-    _createServer(listenPort, serverOptions) {
-        let server = https.createServer(serverOptions, koaApp.callback());
+    _createServer(listenPort, serverFactory) {
+        const server = serverFactory();
         //koaApp.use(formidable());
         this._routes.assignToServer(new KoaServerRouteMediator(koaApp));
         return new Promise((resolve, reject) => {

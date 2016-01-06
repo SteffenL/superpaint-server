@@ -67,13 +67,12 @@ class RouteHandlers {
             .limit(limit)
             .offset(offset);
 
-        let viewModels = Array.from(models, m => new ViewDrawingViewModel(this.request.origin + "/drawing", m.drawing_uuid));
+        let viewModels = Array.from(models, m => new ViewDrawingViewModel(this.request.origin + "/documents", m.drawing_uuid));
         this.body = viewModels;
     }
 
     static *create() {
         const file = this.params.uploadedFile;
-        console.log(file)
 
         yield appContext.bookshelf.transaction(txn => {
             return new dataModels.Drawing({
@@ -127,20 +126,18 @@ class RouteValidators {
         const file = form.files.contents || null;
         this.params.uploadedFile = file;
 
-        const cleanup = () => {
+        const cleanup = function*() {
             if (file) {
-                fs.stat(file.path, (err, stats) => {
-                    if (!err) {
-                        fs.unlink(file.path);
-                    }
+                return fs.statAsync(file.path).then((stats) => {
+                    return fs.unlinkAsync(file.path);
                 });
-            }
+            };
         };
 
         try {
             yield RouteValidators._validateUploadedPngImage(this, file);
             // TODO: Strip unnecessary metadata as well as junk at the end of the file (possibly malicious)?
-            cleanup();
+            //yield cleanup();
             yield next;
         }
         catch (ex) {
@@ -170,7 +167,7 @@ class RouteValidators {
             throw new ValidationError("File contents are missing");
         }
 
-        const limits = appContext.config.businessRules.drawing.uploadLimits;
+        const limits = appContext.config.policies.drawing.uploadLimits;
         if (!Util.Geometry.within(file.size, limits.fileSize.min, limits.fileSize.max)) {
             throw new ValidationError(sprintf(
                 "The file must have a size between %1$d and %2$d bytes (inclusive)",
@@ -190,17 +187,14 @@ class RouteValidators {
             return Jimp.read(file.path).then(image => {
                 this_.params.image = image;
 
-                let sizeIsOk = false;
-                // Check that the image size is allowed
-                for (const sizeLimit of limits.imageSizes) {
-                    if (image.bitmap.width === sizeLimit.width && image.bitmap.height === sizeLimit.height) {
-                        sizeIsOk = true;
-                        break;
-                    }
-                }
+                const b = image.bitmap;
+                const l = limits.imageSize;
+                const dimensionsAreAllowed =
+                    (b.width >= l.width.min) && (b.width <= l.width.max) &&
+                    (b.height >= l.height.min) && (b.height <= l.height.max);
 
-                if (!sizeIsOk) {
-                    throw new ValidationError("Image size is not allowed");
+                if (!dimensionsAreAllowed) {
+                    throw new ValidationError("Image dimensions are not allowed");
                 }
             }).catch(ex => {
                 if (ex instanceof ValidationError) {
@@ -249,7 +243,7 @@ class RouteValidators {
 
 
 const tempExports = {
-    "/drawing": {
+    "/documents": {
         get: {
             handle: RouteHandlers.list,
         },
@@ -260,7 +254,7 @@ const tempExports = {
     }
 };
 
-tempExports[`/drawing/:uuid${FULL_IMAGE_FILE_EXTENSION}`] = {
+tempExports[`/documents/:uuid${FULL_IMAGE_FILE_EXTENSION}`] = {
     get: {
         handle: RouteHandlers.viewFullImage,
         validate: RouteValidators.viewFullImage

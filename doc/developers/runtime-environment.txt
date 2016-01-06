@@ -1,2 +1,4 @@
 Prerequisites:
-	Node.js 5.3.0
+    Node.js 5.3.0
+    C/C++ compiler (tested Visual C++ 2015)
+    Pyton 2.7

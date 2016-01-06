@@ -26,7 +26,7 @@ class ConfigProvider {
      */
     get(name) {
         if (!this._config) {
-            let environmentConfig = this._loadConfig(name);
+            const environmentConfig = this._loadConfig(name);
             this._config = this._mergeConfig(this._defaultConfig, environmentConfig);
         }
         
@@ -49,8 +49,7 @@ class ConfigProvider {
             // User-defined configuration may override the base configuration, so the files are not strictly required
             const userConfig = fs.exists(userConfigPath) ? require(lastConfigPath = userConfigPath) : {};
 
-            let mergedConfig = this._mergeConfig(baseConfig, userConfig);
-
+            const mergedConfig = this._mergeConfig(baseConfig, userConfig);
             return mergedConfig;
         }
         catch (ex) {

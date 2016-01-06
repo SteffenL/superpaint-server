@@ -1,0 +1,4 @@
+npm install
+npm install knex -g
+knex migrate:latest --knexfile ./data/knexfile.js
+npm start

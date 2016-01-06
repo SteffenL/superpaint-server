@@ -65,7 +65,7 @@ class Routes {
         const matches = glob.sync(pattern);
 
         for (let match of matches) {
-            let routeConfig = require(match);
+            const routeConfig = require(match);
             this._validate(routeConfig);
             this._routeConfig.push(routeConfig);
         }

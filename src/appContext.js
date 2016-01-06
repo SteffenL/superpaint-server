@@ -67,7 +67,7 @@ class AppContext {
     }
 
     _loadConfig(name) {
-        let configProvider = new ConfigProvider(
+        const configProvider = new ConfigProvider(
             path.join(this._appDir, "base_config"),
             path.join(this._appDir, "../config"));
 
