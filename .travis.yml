@@ -13,6 +13,3 @@ addons:
       - clang-3.7
 before_script:
   - cd src
-deploy:
-  provider: heroku
-  api_key: 3b3a9841-b503-4133-9c8c-6f21d7b5e756
