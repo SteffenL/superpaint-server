@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "echo 'There are no tests'",
-    "start": "node --harmony ."
+    "start": "node --es-staging ."
   },
   "dependencies": {
     "bluebird-co": "^1.3.2",

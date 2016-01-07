@@ -1,1 +1,1 @@
-web: cd src & npm start
+web: node --es-staging src/main.js
