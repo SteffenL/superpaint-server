@@ -15,7 +15,6 @@ class AppContext {
         this._routesDir = path.join(this._bootConfig.appDir, "routes");
         this._config = this._loadConfig(this._bootConfig.environment, this._bootConfig);
         this._bookshelf = BookshelfFactory.create(this._config.dataSource);
-        console.log(this._config.dataSource)
     }
 
     get appDir() {
