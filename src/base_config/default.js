@@ -1,7 +1,40 @@
-﻿module.exports = {
+﻿"use strict";
+
+const path = require("path"),
+    util = require("util"),
+    bootConfig = require("../bootConfig");
+
+function getEnvironmentVariableOrThrow(varName) {
+    if (!process.env.hasOwnProperty(varName)) {
+        throw new Error("Environment variable is not set: " + varName);
+    }
+
+    const value = process.env[varName];
+    return value;
+}
+
+function getEnvironmentVariableOrDefault(varName, defaultValue) {
+    let value = null;
+    if (!process.env.hasOwnProperty(varName)) {
+        value = defaultValue;
+    }
+    else {
+        value = process.env[varName];
+    }
+
+    return value;
+}
+
+
+const rootDir = path.join(bootConfig.appDir, "..");
+const dataStoreDir = path.join(rootDir, "data_store");
+
+module.exports = {
     server: {
-        httpPort: 80,
-        httpsPort: 443,
+        // PORT is provided by Heroku
+        httpPort: getEnvironmentVariableOrDefault("PORT", 80),
+        // PORT is provided by Heroku
+        httpsPort: getEnvironmentVariableOrDefault("PORT", 443),
         useHttps: false,
         // SSL settings for HTTPS
         ssl: {
@@ -11,19 +44,14 @@
             certificatePath: null
         }
     },
-    database: {
+    dataSource: {
+        client: getEnvironmentVariableOrDefault("SUPERPAINT_DB_CLIENT", "sqlite3"),
+        connection: JSON.parse(getEnvironmentVariableOrDefault("SUPERPAINT_DB_CONNECTION", JSON.stringify({
+            filename: path.join(dataStoreDir, "superpaint.db")
+        })))
     },
-    dataSources: {
-        main: {
-            type: "sqlite3",
-            host: null,
-            database: "superpaint",
-            username: null,
-            password: null,
-            filename: "superpaint.db",
-            charset: "utf8"
-        }
-    },
+    logsDir: path.join(rootDir, "logs"),
+    uploadsDir: path.join(rootDir, "uploads"),
     policies: {
         drawing: {
             uploadLimits: {

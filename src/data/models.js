@@ -1,6 +1,6 @@
 "use strict";
 
-const appContext = require("../appContext").instance;
+const appContext = require("../appContext");
 
 const Drawing = appContext.bookshelf.Model.extend({
     tableName: "drawing",

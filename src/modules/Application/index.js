@@ -2,7 +2,7 @@
 
 const Routes = require("../routes/Routes"),
     KoaServerRouteMediator = require("../routes/route_mediators/KoaServerRouteMediator"),
-    appContext = require("../../appContext").instance,
+    appContext = require("../../appContext"),
     formidable = require("koa-formidable"),
     path = require("path"),
     fs = require("fs"),

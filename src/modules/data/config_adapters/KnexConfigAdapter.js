@@ -7,15 +7,8 @@ class KnexConfigAdapter {
         }
 
         return {
-            client: config.type ? config.type : null,
-            connection: {
-                host: config.host ? config.host : null,
-                user: config.username ? config.username : null,
-                password: config.password ? config.password : null,
-                database: config.database ? config.database : null,
-                filename: config.filename ? config.filename : null,
-                charset: config.charset ? config.charset : null
-            }
+            client: config.client,
+            connection: config.connection
         };
     }
 }

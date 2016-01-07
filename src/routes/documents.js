@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-const appContext = require("../appContext").instance,
+const appContext = require("../appContext"),
     dataModels = require("../data/models"),
     pngMatcher = require("../modules/file_identification/formats/images/png"),
     Util = require("../modules/utils"),
@@ -111,7 +111,7 @@ class RouteHandlers {
     }
 
     static _getDrawingsUploadDir() {
-        return path.join(appContext.uploadsDir, DRAWINGS_RELATIVE_UPLOADS_BASE_DIR);
+        return path.join(appContext.config.uploadsDir, DRAWINGS_RELATIVE_UPLOADS_BASE_DIR);
     }
 
     static _resolveDrawingFullPath(relativePath) {
