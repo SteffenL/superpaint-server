@@ -45,10 +45,21 @@ module.exports = {
         }
     },
     dataSource: {
+        // Make sure to set this to whichever database client you use (see Knex.js documentation).
+        // Examples: sqlite3, pg, mysql
         client: getEnvironmentVariableOrDefault("SUPERPAINT_DB_CLIENT", "sqlite3"),
-        connection: JSON.parse(getEnvironmentVariableOrDefault("SUPERPAINT_DB_CONNECTION", JSON.stringify({
-            filename: path.join(dataStoreDir, "superpaint.db")
-        })))
+        // Connection string for the database (see Knex.js documentation).
+        // Knex.js supports JSON-encoded configuration.
+        connection: getEnvironmentVariableOrDefault(
+            // DATABASE_URL is provided by Heroku as a connection string.
+            "DATABASE_URL",
+            JSON.parse(getEnvironmentVariableOrDefault(
+                // If DATABASE_URL was not set, check for our own JSON-encoded variable.
+                "SUPERPAINT_DB_CONNECTION", JSON.stringify(
+                    {
+                        // JSON-encoded defaults
+                        filename: path.join(dataStoreDir, "superpaint.db")
+                    })))
     },
     logsDir: path.join(rootDir, "logs"),
     uploadsDir: path.join(rootDir, "uploads"),
