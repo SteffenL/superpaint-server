@@ -2,7 +2,7 @@
 
 const Routes = require("../routes/Routes"),
     KoaServerRouteMediator = require("../routes/route_mediators/KoaServerRouteMediator"),
-    appContext = require("../../appContext"),
+    appContext = require("../../defaultAppContext"),
     formidable = require("koa-formidable"),
     path = require("path"),
     fs = require("fs"),
@@ -25,12 +25,7 @@ class Application {
      */
     run() {
         const serverConfig = appContext.config.server;
-
-        let port = appContext.portOverride;
-        if (!port) {
-            port = serverConfig.useHttps ? serverConfig.httpsPort : serverConfig.httpPort;
-        }
-
+        const port = serverConfig.useHttps ? serverConfig.httpsPort : serverConfig.httpPort;
         const serverFactory = serverConfig.useHttps
             ? function() {
                 const serverOptions = {

@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-const appContext = require("../appContext"),
+const appContext = require("../defaultAppContext"),
     dataModels = require("../data/models"),
     pngMatcher = require("../modules/file_identification/formats/images/png"),
     Util = require("../modules/utils"),
@@ -31,7 +31,7 @@ const THUMBNAIL_IMAGE_FILE_EXTENSION = ".jpg";
 const THUMBNAIL_IMAGE_FILE_NAME_POSTFIX = ".th";
 const FULL_IMAGE_MIME_TYPE = "image/png";
 const THUMBNAIL_IMAGE_MIME_TYPE = "image/jpeg";
-const DRAWINGS_RELATIVE_UPLOADS_BASE_DIR = "drawings";
+const DOCUMENTS_RELATIVE_UPLOADS_BASE_DIR = "documents";
 
 
 function makeThumbnailImageUrl(baseUrl, uuid) {
@@ -43,7 +43,7 @@ function makeFullImageUrl(baseUrl, uuid) {
 }
 
 
-class ViewDrawingViewModel {
+class ViewDocumentViewModel {
     constructor(baseUrl, uuid) {
         this.id = uuid;
         // Thumbnail image URL
@@ -61,13 +61,13 @@ class RouteHandlers {
         const limit = 10;
         const offset = 0;
 
-        const models = yield dataModels.Drawing.query()
+        const models = yield dataModels.Document.query()
             .orderBy("created_at", "asc")
-            .select(["drawing_uuid"])
+            .select(["document_uuid"])
             .limit(limit)
             .offset(offset);
 
-        let viewModels = Array.from(models, m => new ViewDrawingViewModel(this.request.origin + "/documents", m.drawing_uuid));
+        let viewModels = Array.from(models, m => new ViewDocumentViewModel(this.request.origin + "/documents", m.document_uuid));
         this.body = viewModels;
     }
 
@@ -75,19 +75,19 @@ class RouteHandlers {
         const file = this.params.uploadedFile;
 
         yield appContext.bookshelf.transaction(txn => {
-            return new dataModels.Drawing({
-                drawing_uuid: uuid.v4(),
+            return new dataModels.Document({
+                document_uuid: uuid.v4(),
                 path: "",
                 type: file.type,
                 size: file.size,
                 hash: this.params.hash
             }).save(null, { transacting: txn }).then(model => {
-                model.set({ path: RouteHandlers._generateRelativeDrawingUploadPath(model.id) });
+                model.set({ path: RouteHandlers._generateRelativeDocumentUploadPath(model.id) });
                 return model.save(null, { transacting: txn }).then(() => {
                     return model;
                 });
             }).then(model => {
-                const uploadFullPath = RouteHandlers._resolveDrawingFullPath(model.get("path"));
+                const uploadFullPath = RouteHandlers._resolveDocumentFullPath(model.get("path"));
                 return fs.mkdirsAsync(path.dirname(uploadFullPath)).then(() => {
                     return fs.moveAsync(file.path, uploadFullPath);
                 });
@@ -98,11 +98,11 @@ class RouteHandlers {
     }
 
     static *viewFullImage(uuid) {
-        const fullPath = RouteHandlers._resolveDrawingFullPath(this.params.model.get("path"));
+        const fullPath = RouteHandlers._resolveDocumentFullPath(this.params.model.get("path"));
         yield sendFile(this, fullPath, { type: this.params.model.get("type") });
     }
 
-    static _generateRelativeDrawingUploadPath(id) { 
+    static _generateRelativeDocumentUploadPath(id) { 
         // We need to organize files into nested directories to avoid/delay exceeding filesystem limitations
         const maxRelativeDirectoryDepth = 7;
         const fileName = id.toString();
@@ -110,12 +110,12 @@ class RouteHandlers {
         return path.posix.join(relativeDir, fileName);
     }
 
-    static _getDrawingsUploadDir() {
-        return path.join(appContext.config.uploadsDir, DRAWINGS_RELATIVE_UPLOADS_BASE_DIR);
+    static _getDocumentsUploadDir() {
+        return path.join(appContext.config.uploadsDir, DOCUMENTS_RELATIVE_UPLOADS_BASE_DIR);
     }
 
-    static _resolveDrawingFullPath(relativePath) {
-        return path.join(RouteHandlers._getDrawingsUploadDir(), relativePath);
+    static _resolveDocumentFullPath(relativePath) {
+        return path.join(RouteHandlers._getDocumentsUploadDir(), relativePath);
     }
 }
 
@@ -152,7 +152,7 @@ class RouteValidators {
     }
 
     static *viewFullImage(uuid, next) {
-        const model = yield new dataModels.Drawing({ drawing_uuid: uuid }).fetch();
+        const model = yield new dataModels.Document({ document_uuid: uuid }).fetch();
         if (!model) {
             this.throw(404);
             return;
@@ -167,7 +167,7 @@ class RouteValidators {
             throw new ValidationError("File contents are missing");
         }
 
-        const limits = appContext.config.policies.drawing.uploadLimits;
+        const limits = appContext.config.policies.document.uploadLimits;
         if (!Util.Geometry.within(file.size, limits.fileSize.min, limits.fileSize.max)) {
             throw new ValidationError(sprintf(
                 "The file must have a size between %1$d and %2$d bytes (inclusive)",
@@ -213,7 +213,7 @@ class RouteValidators {
                 return crypto.createHash("sha256").update(buffer).digest("hex");
             }).then(hash => {
                 this_.params.hash = hash;
-                return dataModels.Drawing.where("hash", hash).count();
+                return dataModels.Document.where("hash", hash).count();
             }).then(count => {
                 if (count > 0) {
                     throw new ValidationError("File has already been uploaded");

@@ -1,13 +1,13 @@
 "use strict";
 
-const appContext = require("../appContext");
+const appContext = require("../defaultAppContext");
 
-const Drawing = appContext.bookshelf.Model.extend({
-    tableName: "drawing",
-    idAttribute: "drawing_id",
+const Document = appContext.bookshelf.Model.extend({
+    tableName: "document",
+    idAttribute: "document_id",
     hasTimestamps: true
 });
 
 module.exports = {
-    Drawing: Drawing
+    Document: Document
 };

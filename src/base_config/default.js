@@ -53,7 +53,7 @@ module.exports = {
     logsDir: path.join(rootDir, "logs"),
     uploadsDir: path.join(rootDir, "uploads"),
     policies: {
-        drawing: {
+        document: {
             uploadLimits: {
                 imageSize: {
                     width: { min: 256, max: 1920 },
