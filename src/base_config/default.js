@@ -59,7 +59,7 @@ module.exports = {
                     {
                         // JSON-encoded defaults
                         filename: path.join(dataStoreDir, "superpaint.db")
-                    })))
+                    }))))
     },
     logsDir: path.join(rootDir, "logs"),
     uploadsDir: path.join(rootDir, "uploads"),
