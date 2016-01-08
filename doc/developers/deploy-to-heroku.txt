@@ -1,0 +1,3 @@
+Push the latest changes to Heroku, then run database migration:
+
+heroku run knex migrate:latest --knexfile ./src/data/knexfile.js
