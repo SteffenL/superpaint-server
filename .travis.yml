@@ -11,5 +11,3 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - clang-3.7
-before_script:
-  - cd src
