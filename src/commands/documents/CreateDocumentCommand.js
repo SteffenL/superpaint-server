@@ -1,7 +1,7 @@
 "use strict";
 
 const dataModels = require("../../data/models"),
-    appContext = require("../../defaultAppContext"),
+    appContext = require("../../appContextInstance"),
     CreateFileHash = require("./CreateFileHashCommand"),
     Promise = require("bluebird"),
     cloudinary = require("cloudinary"),

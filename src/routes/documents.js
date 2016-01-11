@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-const appContext = require("../defaultAppContext"),
+const appContext = require("../appContextInstance"),
     dataModels = require("../data/models"),
     pngMatcher = require("../modules/file_identification/formats/images/png"),
     Util = require("../modules/utils"),

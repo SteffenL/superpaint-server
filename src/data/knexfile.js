@@ -1,7 +1,7 @@
 "use strict";
 
 const path = require("path"),
-    appContext = require("../defaultAppContext"),
+    appContext = require("../appContextInstance"),
     bootConfig = require("../bootConfig"),
     KnexConfigAdapter = require("../modules/data/config_adapters/KnexConfigAdapter");
 

@@ -1,8 +1,8 @@
 "use strict";
 
-const Routes = require("../routes/Routes"),
-    KoaServerRouteMediator = require("../Routes/route_mediators/KoaServerRouteMediator"),
-    appContext = require("../../defaultAppContext"),
+const Routes = require("./routes/Routes"),
+    KoaServerRouteMediator = require("./routes/route_mediators/KoaServerRouteMediator"),
+    appContext = require("../appContextInstance"),
     formidable = require("koa-formidable"),
     path = require("path"),
     fs = require("fs"),

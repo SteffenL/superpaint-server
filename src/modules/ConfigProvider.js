@@ -1,6 +1,6 @@
 ﻿"use strict";
 
-const utils = require("../utils"),
+const utils = require("./utils"),
     path = require("path"),
     fs = require("fs");
 
