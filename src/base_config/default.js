@@ -62,7 +62,12 @@ module.exports = {
                     }))))
     },
     logsDir: path.join(rootDir, "logs"),
-    uploadsDir: path.join(rootDir, "uploads"),
+    uploads: {
+        // Path to the root directory for uploaded files when storing files on the local file system.
+        rootDir: path.join(rootDir, "uploads"),
+        // Relative path to the directory where documents are stored.
+        relativeDocumentsDir: "documents"
+    },
     policies: {
         document: {
             uploadLimits: {

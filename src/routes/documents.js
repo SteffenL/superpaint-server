@@ -10,11 +10,10 @@ const appContext = require("../defaultAppContext"),
     sprintf = require("sprintf-js").sprintf,
     Jimp = require("jimp"),
     uuid = require("uuid"),
-    crypto = require("crypto"),
     path = require("path"),
     formidable = require("koa-formidable"),
-    cloudinary = require("cloudinary"),
-    util = require("util");
+    util = require("util"),
+    commands = require("../commands");
 
 Promise.coroutine.addYieldHandler(BluebirdCo.toPromise);
 
@@ -29,7 +28,6 @@ class ValidationError extends Error {
 const MAX_RESULTS_PER_PAGE = 50;
 const FULL_IMAGE_FILE_EXTENSION = ".png";
 const FULL_IMAGE_MIME_TYPE = "image/png";
-const DOCUMENTS_RELATIVE_UPLOADS_BASE_DIR = "documents";
 
 
 class ViewDocumentViewModel {
@@ -50,34 +48,18 @@ class RouteHandlers {
         const limit = 10;
         const offset = 0;
 
-        const models = yield dataModels.Document.query()
-            .orderBy("created_at", "asc")
-            .select(["document_uuid", "path"])
-            .limit(limit)
-            .offset(offset);
+        const command = new commands.documents.GetDocumentsWithPaginationCommand(offset, limit);
+        const documents = yield command.execute();
 
-        let viewModels = Array.from(models, m => new ViewDocumentViewModel(m.path, m.document_uuid));
+        const viewModels = Array.from(documents, m => new ViewDocumentViewModel(m.path, m.document_uuid));
         this.body = viewModels;
     }
 
     static *create() {
         const file = this.params.uploadedFile;
 
-        const documentUuid = uuid.v4();
-
-        yield new Promise((resolve, reject) => {
-            cloudinary.uploader.upload(file.path, resolve, {
-                public_id: util.format("%s/%s", DOCUMENTS_RELATIVE_UPLOADS_BASE_DIR, documentUuid)
-            });
-        }).then(uploadResult => {
-            return new dataModels.Document({
-                document_uuid: documentUuid,
-                path: uploadResult.secure_url,
-                type: file.type,
-                size: file.size,
-                hash: this.params.hash
-            }).save(null);
-        });
+        const command = new commands.documents.CreateDocumentCommand(file.path, file.type);
+        const document = yield command.execute();
 
         this.body = {};
     }
@@ -95,7 +77,7 @@ class RouteValidators {
                 return fs.statAsync(file.path).then((stats) => {
                     return fs.unlinkAsync(file.path);
                 });
-            };
+            }
         };
 
         try {
@@ -161,10 +143,8 @@ class RouteValidators {
         // TODO: Do a virus scan. It should preferably work on multiple platforms.
         .then(() => {
             // Make sure the file has not already been uploaded
-            // TODO: We should normally not load the whole file into memory, so let's not do it
-            return fs.readFileAsync(file.path).then(buffer => {
-                return crypto.createHash("sha256").update(buffer).digest("hex");
-            }).then(hash => {
+            const command = new commands.documents.CreateFileHashCommand(file.path);
+            return command.execute().then(hash => {
                 this_.params.hash = hash;
                 return dataModels.Document.where("hash", hash).count();
             }).then(count => {
