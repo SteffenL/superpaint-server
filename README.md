@@ -2,41 +2,38 @@
 
 This is the server application containing services meant to be consumed by the SuperPaint client application.
 
-## Running the server
+## Runtime environment
+- Node.js 5.3.0
+- C/C++ compiler (tested Visual C++ 2015 and Clang 3.7)
+- Python 2.7
+- PostgreSQL 9.4
+- Heroku
 
-1. Configure the application (see below).
-2. Run `node app`.
+## Running the server locally
 
-## Configuration
+The environment will be "development" by default, and use SQLite instead of PostgreSQL.
 
-Copy the base configuration from `app/config/base` to `config`, then edit the copied files.
+1. Install dependencies:
+    - `npm install`
+    - `npm install knex -g`
+2. Run database migration:
+    - `knex migrate:latest --knexfile ./src/data/knexfile.js`
+3. Run the server with `npm start`.
 
-There is a `default` configuration, and one for each type of environment, e.g. `dev` (development) and `prod` (production). You need more environments, just make new files.
+## Deploy to Heroku
 
-You must currently set the data source and environment you plan to use inside `app/main.js`.
+Required add-ons:
 
-### Configuration format
+- Cloudinary
+- Heroku Postgres :: Database
 
-- **server:**
-    - (string) **httpPort:** HTTP port to listen on.
-    - (string) **httpsPort:** HTTPS port to listen on.
-    - **ssl:** SSL configuration.
-        - (string) **keyPath:** Path to a file containing the private key for the public server certificate.
-        - (string) **certificatePath:** Path to a file to use as the public server certificate.
-    - **database:**
-        - (bool) **createIfNeeded:** Create the database and/or missing tables if needed.
-    - **dataSources:**
-        - (a name of your choice)
-            - (string) **type:** Possible values: `sqlite`.
-            - (string) **database:** Database name.
-            - (string) **username:** Database username.
-            - (string) **password:** Database password.
-        - ...
-    - **businessRules:** Business/Application rules.
-        -  **drawing:** Drawings produced by SuperPaint and uploaded.
-            -  **upload:** Rules for uploaded drawings.
-                -  **limits:** Limitations.
-                    -  (int) **minDimensions:** Minimum image dimensions.
-                    -  (int) **maxDimensions:** Maximum image dimensions.
-                    -  (int) **minFileSize:** Minimum file size.
-                    -  (int) **maxFileSize:** Maximum file size.
+Required environment variables:
+
+- CLOUDINARY_URL: Provided by Heroku.
+- DATABASE_URL: Provided by Heroku.
+- NODE_ENV: `staging` or `production`.
+- SUPERPAINT_DB_CLIENT: `pg`.
+
+Push the latest changes to Heroku, then run database migration:
+
+`heroku run knex migrate:latest --knexfile ./src/data/knexfile.js`

@@ -1,9 +1,0 @@
-Install dependencies:
-npm install
-npm install knex -g
-
-Run database migration:
-knex migrate:latest --knexfile ./src/data/knexfile.js
-
-Run the application:
-npm start
