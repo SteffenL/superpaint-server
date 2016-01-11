@@ -1,3 +1,13 @@
+Add add-ons:
+    Cloudinary
+    Heroku Postgres :: Database
+
+Required environment variables:
+    CLOUDINARY_URL = (specified by Heroku)
+    DATABASE_URL = (specified by Heroku)
+    NODE_ENV = staging
+    SUPERPAINT_DB_CLIENT = pg
+
 Push the latest changes to Heroku, then run database migration:
 
 heroku run knex migrate:latest --knexfile ./src/data/knexfile.js

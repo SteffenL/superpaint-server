@@ -11,9 +11,10 @@ const appContext = require("../defaultAppContext"),
     Jimp = require("jimp"),
     uuid = require("uuid"),
     crypto = require("crypto"),
-    sendFile = require("../modules/sendFile"),
     path = require("path"),
-    formidable = require("koa-formidable");
+    formidable = require("koa-formidable"),
+    cloudinary = require("cloudinary"),
+    util = require("util");
 
 Promise.coroutine.addYieldHandler(BluebirdCo.toPromise);
 
@@ -27,29 +28,17 @@ class ValidationError extends Error {
 
 const MAX_RESULTS_PER_PAGE = 50;
 const FULL_IMAGE_FILE_EXTENSION = ".png";
-const THUMBNAIL_IMAGE_FILE_EXTENSION = ".jpg";
-const THUMBNAIL_IMAGE_FILE_NAME_POSTFIX = ".th";
 const FULL_IMAGE_MIME_TYPE = "image/png";
-const THUMBNAIL_IMAGE_MIME_TYPE = "image/jpeg";
 const DOCUMENTS_RELATIVE_UPLOADS_BASE_DIR = "documents";
 
 
-function makeThumbnailImageUrl(baseUrl, uuid) {
-    return `${baseUrl}/${uuid}${THUMBNAIL_IMAGE_FILE_NAME_POSTFIX}${THUMBNAIL_IMAGE_FILE_EXTENSION}`;
-}
-
-function makeFullImageUrl(baseUrl, uuid) {
-    return `${baseUrl}/${uuid}${FULL_IMAGE_FILE_EXTENSION}`;
-}
-
-
 class ViewDocumentViewModel {
-    constructor(baseUrl, uuid) {
+    constructor(path, uuid) {
         this.id = uuid;
         // Thumbnail image URL
-        this.thumbnailUrl = makeThumbnailImageUrl(baseUrl, uuid);
+        this.thumbnailUrl = path;
         // Full image URL
-        this.fullUrl = makeFullImageUrl(baseUrl, uuid);
+        this.fullUrl = path;
     }
 }
 
@@ -63,59 +52,34 @@ class RouteHandlers {
 
         const models = yield dataModels.Document.query()
             .orderBy("created_at", "asc")
-            .select(["document_uuid"])
+            .select(["document_uuid", "path"])
             .limit(limit)
             .offset(offset);
 
-        let viewModels = Array.from(models, m => new ViewDocumentViewModel(this.request.origin + "/documents", m.document_uuid));
+        let viewModels = Array.from(models, m => new ViewDocumentViewModel(m.path, m.document_uuid));
         this.body = viewModels;
     }
 
     static *create() {
         const file = this.params.uploadedFile;
 
-        yield appContext.bookshelf.transaction(txn => {
+        const documentUuid = uuid.v4();
+
+        yield new Promise((resolve, reject) => {
+            cloudinary.uploader.upload(file.path, resolve, {
+                public_id: util.format("%s/%s", DOCUMENTS_RELATIVE_UPLOADS_BASE_DIR, documentUuid)
+            });
+        }).then(uploadResult => {
             return new dataModels.Document({
-                document_uuid: uuid.v4(),
-                path: "",
+                document_uuid: documentUuid,
+                path: uploadResult.secure_url,
                 type: file.type,
                 size: file.size,
                 hash: this.params.hash
-            }).save(null, { transacting: txn }).then(model => {
-                model.set({ path: RouteHandlers._generateRelativeDocumentUploadPath(model.id) });
-                return model.save(null, { transacting: txn }).then(() => {
-                    return model;
-                });
-            }).then(model => {
-                const uploadFullPath = RouteHandlers._resolveDocumentFullPath(model.get("path"));
-                return fs.mkdirsAsync(path.dirname(uploadFullPath)).then(() => {
-                    return fs.moveAsync(file.path, uploadFullPath);
-                });
-            });
+            }).save(null);
         });
 
         this.body = {};
-    }
-
-    static *viewFullImage(uuid) {
-        const fullPath = RouteHandlers._resolveDocumentFullPath(this.params.model.get("path"));
-        yield sendFile(this, fullPath, { type: this.params.model.get("type") });
-    }
-
-    static _generateRelativeDocumentUploadPath(id) { 
-        // We need to organize files into nested directories to avoid/delay exceeding filesystem limitations
-        const maxRelativeDirectoryDepth = 7;
-        const fileName = id.toString();
-        const relativeDir = fileName.split("", maxRelativeDirectoryDepth).join("/");
-        return path.posix.join(relativeDir, fileName);
-    }
-
-    static _getDocumentsUploadDir() {
-        return path.join(appContext.config.uploadsDir, DOCUMENTS_RELATIVE_UPLOADS_BASE_DIR);
-    }
-
-    static _resolveDocumentFullPath(relativePath) {
-        return path.join(RouteHandlers._getDocumentsUploadDir(), relativePath);
     }
 }
 
@@ -149,17 +113,6 @@ class RouteValidators {
 
             throw ex;
         }
-    }
-
-    static *viewFullImage(uuid, next) {
-        const model = yield new dataModels.Document({ document_uuid: uuid }).fetch();
-        if (!model) {
-            this.throw(404);
-            return;
-        }
-
-        this.params.model = model;
-        yield next;
     }
 
     static _validateUploadedPngImage(this_, file) {
@@ -251,13 +204,6 @@ const tempExports = {
             handle: RouteHandlers.create,
             validate: RouteValidators.create
         }
-    }
-};
-
-tempExports[`/documents/:uuid${FULL_IMAGE_FILE_EXTENSION}`] = {
-    get: {
-        handle: RouteHandlers.viewFullImage,
-        validate: RouteValidators.viewFullImage
     }
 };
 
